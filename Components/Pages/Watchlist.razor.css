@@ -1,0 +1,34 @@
+.px-watchlist-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.px-watchlist-header h1 {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.px-watchlist-count {
+    font-family: var(--px-font);
+    font-size: 9px;
+    color: var(--px-muted);
+}
+
+.px-watchlist-empty {
+    border: 3px dashed var(--px-gray);
+    padding: 60px;
+    text-align: center;
+    font-family: var(--px-font);
+    font-size: 9px;
+    color: var(--px-muted);
+    line-height: 2;
+}
+
+.px-watchlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 20px;
+}

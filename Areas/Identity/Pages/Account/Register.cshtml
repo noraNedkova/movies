@@ -1,0 +1,69 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="px-auth-page">
+    <div class="px-card px-auth-card">
+
+        <h1 class="px-heading px-auth-title">Create Account</h1>
+        <p class="px-auth-subtitle">Join MovieBoxd</p>
+
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="px-auth-field">
+                <label asp-for="Input.Email" class="px-auth-label">Email</label>
+                <input asp-for="Input.Email" class="px-input" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="px-auth-field">
+                <label asp-for="Input.Password" class="px-auth-label">Password</label>
+                <input asp-for="Input.Password" class="px-input" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="px-auth-field">
+                <label asp-for="Input.ConfirmPassword" class="px-auth-label">Confirm Password</label>
+                <input asp-for="Input.ConfirmPassword" class="px-input" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button id="registerSubmit" type="submit" class="px-btn px-btn-pink px-btn-block">Register</button>
+
+        </form>
+
+        @{
+            if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <hr class="px-auth-divider" />
+
+                <div class="px-auth-external">
+                    <div class="px-auth-external-title">Or register with</div>
+
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" class="px-btn px-btn-card px-btn-block" style="margin-bottom:8px" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                        }
+                    </form>
+                </div>
+            }
+            else
+            {
+                <p class="px-auth-external-title" style="margin-top:20px;">
+                    No external authentication services configured. See this
+                    <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article about setting up external services</a>.
+                </p>
+            }
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

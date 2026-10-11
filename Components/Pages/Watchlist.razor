@@ -1,0 +1,100 @@
+@page "/watchlist"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.EntityFrameworkCore
+@using Movies.Models
+@using Movies.Components.Shared
+@using System.Security.Claims
+
+@implements IAsyncDisposable
+
+@inject IDbContextFactory<MoviesContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>My Watchlist</PageTitle>
+
+<div class="px-watchlist-header">
+    <img src="images/watchlist.png"
+         alt=""
+         width="40"
+         height="40"
+         style="image-rendering:pixelated" />
+
+    <div>
+        <h1 class="px-heading">Watchlist</h1>
+
+        <span class="px-watchlist-count">
+            @(items?.Count ?? 0) movie@((items?.Count ?? 0) == 1 ? "" : "s")
+        </span>
+    </div>
+</div>
+
+@if (items == null)
+{
+    <p>Loading…</p>
+}
+else if (items.Count == 0)
+{
+    <div class="px-watchlist-empty">
+        Your watchlist is empty.<br />
+        <a href="/movies">Browse movies</a>
+    </div>
+}
+else
+{
+    <div class="px-watchlist-grid">
+
+        @foreach (var item in items)
+        {
+            <MovieCard Movie="item.Movie"
+                       RemoveMode="true"
+                       OnRemove="() => Remove(item.Id)" />
+        }
+
+    </div>
+}
+
+@code {
+
+    private List<WatchlistItem>? items;
+
+    private MoviesContext context = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+
+        var state =
+            await AuthStateProvider.GetAuthenticationStateAsync();
+
+        var userId =
+            state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        items = userId == null
+            ? new()
+            : await context.WatchlistItem
+                .Include(w => w.Movie)
+                .Where(w => w.UserId == userId)
+                .ToListAsync();
+    }
+
+    private async Task Remove(int id)
+    {
+        var item = items?.FirstOrDefault(w => w.Id == id);
+
+        if (item == null)
+            return;
+
+        context.WatchlistItem.Remove(item);
+
+        await context.SaveChangesAsync();
+
+        items!.Remove(item);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await context.DisposeAsync();
+    }
+}

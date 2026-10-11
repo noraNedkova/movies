@@ -1,0 +1,106 @@
+@using Movies.Data
+@using Movies.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<MoviesContext> DbFactory
+
+<div class="px-movie-search">
+
+    <input type="search"
+           class="px-movie-search-input"
+           placeholder="Search movies..."
+           @bind="SearchText"
+           @bind:event="oninput"
+           @bind:after="SearchChanged" />
+
+    @if (Movies.Count > 0)
+    {
+        <div class="px-movie-search-results">
+
+            @foreach (var movie in Movies)
+            {
+                <button type="button"
+                        class="px-movie-search-result"
+                        @onclick="() => SelectMovie(movie)">
+
+                    @if (!string.IsNullOrWhiteSpace(movie.PosterPath))
+                    {
+                        <img src="@($"https://image.tmdb.org/t/p/w92{movie.PosterPath}")"
+                             alt="@movie.Title" />
+                    }
+                    else
+                    {
+                        <div class="px-movie-search-no-image">
+                            No Image
+                        </div>
+                    }
+
+                    <div class="px-movie-search-info">
+
+                        <strong>@movie.Title</strong>
+
+                        <span>
+                            @movie.ReleaseDate.Year
+                        </span>
+
+                        <span class="px-movie-search-rating">
+
+                            <img src="images/star.png"
+                                 alt=""
+                                 width="24"
+                                 height="20"
+                                 style="image-rendering:pixelated" />
+
+                            @movie.Rating / 10
+
+                        </span>
+
+                    </div>
+
+                </button>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    [Parameter]
+    public EventCallback<Movie> MovieSelected { get; set; }
+
+    private string SearchText = string.Empty;
+
+    private List<Movie> Movies = new();
+
+    private async Task SearchChanged()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Movies.Clear();
+            return;
+        }
+
+        await using var context =
+            await DbFactory.CreateDbContextAsync();
+
+        Movies = await context.Movie
+            .AsNoTracking()
+            .Where(m =>
+                m.Title != null &&
+                m.Title.Contains(SearchText))
+            .OrderBy(m => m.Title)
+            .Take(8)
+            .ToListAsync();
+    }
+
+    private async Task SelectMovie(Movie movie)
+    {
+        SearchText = movie.Title ?? string.Empty;
+
+        Movies.Clear();
+
+        await MovieSelected.InvokeAsync(movie);
+    }
+}

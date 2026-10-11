@@ -1,0 +1,45 @@
+<div class="px-movie-sort">
+
+    <select id="sortMovies"
+            class="px-select px-movie-sort-select"
+            value="@Value"
+            @onchange="SortChanged">
+
+        <option value="title-asc">Title A-Z</option>
+        <option value="title-desc">Title Z-A</option>
+        <option value="rating-desc">Rating: highest first</option>
+        <option value="rating-asc">Rating: lowest first</option>
+        <option value="date-desc">Release date: newest first</option>
+        <option value="date-asc">Release date: oldest first</option>
+
+    </select>
+
+</div>
+
+<style>
+    .px-movie-sort {
+        min-width: 200px;
+    }
+
+    .px-movie-sort-select {
+        width: 100%;
+        height: 42px;
+        box-sizing: border-box;
+    }
+</style>
+
+@code {
+
+    [Parameter]
+    public string Value { get; set; } = "title-asc";
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private async Task SortChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? "title-asc";
+
+        await ValueChanged.InvokeAsync(value);
+    }
+}

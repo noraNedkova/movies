@@ -1,0 +1,36 @@
+@inherits LayoutComponentBase
+
+<div class="px-page">
+    <NavMenu />
+
+    <main class="px-main">
+        <div class="px-topbar">
+            <AuthorizeView>
+                <Authorized Context="auth">
+                    <span class="px-topbar-user">@auth.User.Identity?.Name</span>
+                    <a class="px-btn px-btn-card" href="/Identity/Account/Logout">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a class="px-btn px-btn-card" href="/Identity/Account/Login">Login</a>
+                    <a class="px-btn px-btn-pink" href="/Identity/Account/Register">Register</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="px-content">
+            @Body
+        </article>
+    </main>
+</div>
+
+<AuthorizeView>
+    <Authorized>
+        <Chatbot/>
+    </Authorized>
+</AuthorizeView>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

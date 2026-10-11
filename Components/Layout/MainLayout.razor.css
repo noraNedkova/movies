@@ -1,0 +1,70 @@
+.px-page {
+    position: relative;
+    display: flex;
+    min-height: 100vh;
+}
+
+.px-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-width: 0;
+}
+
+.px-topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 36px;
+    border-bottom: 3px solid var(--px-border);
+    background: var(--px-card);
+}
+
+.px-topbar-user {
+    font-family: var(--px-font);
+    font-size: 9px;
+    color: var(--px-muted);
+}
+
+.px-content {
+    flex: 1;
+    padding: 40px 36px;
+    overflow-y: auto;
+}
+
+#blazor-error-ui {
+    color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+@media (max-width: 640.98px) {
+    .px-page {
+        flex-direction: column;
+    }
+
+    .px-content {
+        padding: 24px 18px;
+    }
+
+    .px-topbar {
+        padding: 12px 18px;
+    }
+}

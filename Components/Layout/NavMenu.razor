@@ -1,0 +1,22 @@
+<aside class="px-sidebar">
+    <a class="px-sidebar-logo" href="/">
+        <img src="images/logoo.png" alt="" width="60" height="60" style="image-rendering:pixelated" />
+        <span class="px-heading">Movie<br />Boxd</span>
+    </a>
+
+    <nav class="px-sidebar-nav">
+        <AuthorizeView>
+            <Authorized>
+                <NavLink class="px-nav-item" href="/" Match="NavLinkMatch.All">
+                    <img src="images/movie.png" alt="" width="33" height="34" style="image-rendering:pixelated" />
+                    Movies
+                </NavLink>
+                <NavLink class="px-nav-item" href="watchlist">
+                    <img src="images/watchlist.png" alt="" width="36" height="33" style="image-rendering:pixelated" />
+                    Watchlist
+                </NavLink>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+
+</aside>

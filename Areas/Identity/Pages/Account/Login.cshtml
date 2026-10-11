@@ -1,0 +1,66 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="px-auth-page">
+    <div class="px-card px-auth-card">
+
+        <h1 class="px-heading px-auth-title">Welcome Back</h1>
+        <p class="px-auth-subtitle">Log in to MovieBoxd</p>
+
+        <form id="account" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+            <div class="px-auth-field">
+                <label asp-for="Input.Email" class="px-auth-label">Email</label>
+                <input asp-for="Input.Email" class="px-input" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+
+            <div class="px-auth-field">
+                <label asp-for="Input.Password" class="px-auth-label">Password</label>
+                <input asp-for="Input.Password" class="px-input" autocomplete="current-password" aria-required="true" placeholder="password" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+
+            <div class="px-auth-checkbox">
+                <input class="form-check-input" asp-for="Input.RememberMe" />
+                <label asp-for="Input.RememberMe">@Html.DisplayNameFor(m => m.Input.RememberMe)</label>
+            </div>
+
+            <button id="login-submit" type="submit" class="px-btn px-btn-pink px-btn-block">Log in</button>
+
+        </form>
+
+        @{
+            if ((Model.ExternalLogins?.Count ?? 0) > 0)
+            {
+                <hr class="px-auth-divider" />
+
+                <div class="px-auth-external">
+                    <div class="px-auth-external-title">Or log in with</div>
+
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                        @foreach (var provider in Model.ExternalLogins!)
+                        {
+                            <button type="submit" class="px-btn px-btn-card px-btn-block" style="margin-bottom:8px" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                        }
+                    </form>
+                </div>
+            }
+            else
+            {
+               
+            }
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

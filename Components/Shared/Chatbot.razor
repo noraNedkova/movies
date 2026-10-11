@@ -1,0 +1,205 @@
+@rendermode InteractiveServer
+@using Movies.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject AiService AiService
+
+<div class="px-chat">
+
+    @if (IsOpen)
+    {
+        <div class="px-card px-chat-window">
+
+            <div class="px-chat-header">
+                <div class="px-chat-header-info">
+                    <img src="images/robot.png"
+                         alt=""
+                         width="28"
+                         height="30"
+                         style="image-rendering:pixelated" />
+
+                    <div>
+                        <div class="px-heading px-chat-title">
+                            Movie AI
+                        </div>
+                    </div>
+                </div>
+
+                <button class="px-chat-close"
+                        @onclick="Close">
+                    ×
+                </button>
+            </div>
+
+            <div class="px-chat-messages">
+
+                @if (Messages.Count == 0)
+                {
+                    <div class="px-chat-welcome">
+
+                        <img src="images/robot.png"
+                             alt=""
+                             width="56"
+                             height="60"
+                             style="image-rendering:pixelated" />
+
+                        <div class="px-heading px-chat-welcome-title">
+                            Hi!
+                        </div>
+
+                        <p>
+                            Ask me about movies, genres, directors,
+                            recommendations, or this website.
+                        </p>
+
+                    </div>
+                }
+
+                @foreach (var message in Messages)
+                {
+                    <div class="px-chat-message @(message.IsUser
+                        ? "px-chat-message-user"
+                        : "px-chat-message-ai")">
+
+                        <div class="px-chat-bubble">
+                            @message.Text
+                        </div>
+
+                    </div>
+                }
+
+                @if (IsThinking)
+                {
+                    <div class="px-chat-message px-chat-message-ai">
+
+                        <div class="px-chat-bubble px-chat-thinking">
+                            Thinking...
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+            <div class="px-chat-input">
+
+                <textarea class="px-input px-chat-textarea"
+                          @bind="Question"
+                          @bind:event="oninput"
+                          @onkeydown="HandleKeyDown"
+                          placeholder="Ask..."
+                          rows="1"
+                          disabled="@IsThinking">
+                </textarea>
+
+                <button class="px-btn px-btn-pink px-chat-send"
+                        @onclick="SendMessage"
+                        disabled="@(IsThinking || string.IsNullOrWhiteSpace(Question))">
+                    ➤
+                </button>
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <button class="px-btn px-btn-pink px-chat-fab"
+                @onclick="Open">
+
+            <img src="images/robot.png"
+                 alt=""
+                 width="56"
+                 height="60"
+                 style="image-rendering:pixelated" />
+
+            <span>Movie AI</span>
+
+        </button>
+    }
+
+</div>
+
+@code {
+
+    private bool IsOpen;
+
+    private bool IsThinking;
+
+    private string Question = string.Empty;
+
+    private List<ChatMessage> Messages = new();
+
+    private void Open()
+    {
+        IsOpen = true;
+    }
+
+    private void Close()
+    {
+        IsOpen = false;
+    }
+
+    private async Task SendMessage()
+    {
+        if (IsThinking || string.IsNullOrWhiteSpace(Question))
+            return;
+
+        var question = Question.Trim();
+
+        Messages.Add(new ChatMessage
+        {
+            Text = question,
+            IsUser = true
+        });
+
+        Question = string.Empty;
+        IsThinking = true;
+
+        try
+        {
+            var request = await AiService.AskAsync(question);
+
+            string answer = request.Intent switch
+            {
+                "search" =>
+                    await AiService.SearchMoviesAsync(request),
+
+                _ =>
+                    await AiService.ChatAsync(question)
+            };
+
+            Messages.Add(new ChatMessage
+            {
+                Text = answer,
+                IsUser = false
+            });
+        }
+        catch
+        {
+            Messages.Add(new ChatMessage
+            {
+                Text = "Sorry, I couldn't connect to Movie AI.",
+                IsUser = false
+            });
+        }
+        finally
+        {
+            IsThinking = false;
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+
+    private class ChatMessage
+    {
+        public string Text { get; set; } = string.Empty;
+
+        public bool IsUser { get; set; }
+    }
+}

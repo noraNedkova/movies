@@ -1,0 +1,98 @@
+@using Movies.Models
+@using Movies.Services
+@inject AddToWatchlist AddToWatchlist
+
+<div class="px-card px-watchlist-item @(CompactHorizontal ? "px-movie-card-horizontal" : "")">
+
+    @if (!string.IsNullOrEmpty(Movie.PosterPath))
+    {
+        <img src="https://image.tmdb.org/t/p/w300@(Movie.PosterPath)"
+             class="px-watchlist-poster"
+             alt="@Movie.Title" />
+    }
+    else
+    {
+        <div class="px-no-poster">
+            No Image
+        </div>
+    }
+
+    <div class="px-watchlist-body">
+
+        <div class="px-heading px-watchlist-title">
+            @Movie.Title
+        </div>
+
+        <span class="px-watchlist-meta">
+            @Movie.Genre &middot; @Movie.ReleaseDate.Year
+        </span>
+
+        <span class="px-watchlist-meta">
+            <img src="images/star.png"
+                 alt=""
+                 width="39"
+                 height="33"
+                 style="image-rendering:pixelated" />
+            @Movie.Rating / 10
+        </span>
+
+        @if (RemoveMode)
+        {
+            <button class="px-btn px-btn-pink"
+                    @onclick="RemoveClicked">
+                ✕ Remove
+            </button>
+        }
+        else
+        {
+            <button class="px-btn @(IsWatched ? "px-btn-blue" : "px-btn-card")"
+                    @onclick="ToggleWatchlist">
+
+                @(IsWatched ? "✓ Added" : "+ Watch")
+
+            </button>
+        }
+
+    </div>
+
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Movie Movie { get; set; } = default!;
+
+    [Parameter]
+    public bool RemoveMode { get; set; }
+
+    [Parameter]
+    public EventCallback OnRemove { get; set; }
+
+    [Parameter]
+    public bool CompactHorizontal { get; set; }
+
+    private bool IsWatched;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (RemoveMode)
+        {
+            IsWatched = true;
+            return;
+        }
+
+        IsWatched =
+            await AddToWatchlist.IsWatchedAsync(Movie.Id);
+    }
+
+    private async Task ToggleWatchlist()
+    {
+        IsWatched =
+            await AddToWatchlist.ToggleAsync(Movie.Id);
+    }
+
+    private async Task RemoveClicked()
+    {
+        await OnRemove.InvokeAsync();
+    }
+}

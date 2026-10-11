@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --px-bg: #FFF5F8;
+    --px-sidebar: #EEF4FF;
+    --px-card: #FFFFFF;
+    --px-border: #2D2D3D;
+    --px-pink: #FF6EB4;
+    --px-pink-dark: #CC3388;
+    --px-pink-light: #FFE8F5;
+    --px-blue: #7EC8E3;
+    --px-blue-dark: #4A9CB8;
+    --px-yellow: #FFD166;
+    --px-gray: #C8C8D8;
+    --px-text: #2D2D3D;
+    --px-muted: #9090A0;
+    --px-font: 'Press Start 2P', monospace;
+}
+
+body {
+    background: var(--px-bg);
+    color: var(--px-text);
+}
+
+.px-heading {
+    font-family: var(--px-font);
+    margin: 0;
+}
+
+/* Card */
+.px-card {
+    background: var(--px-card);
+    border: 3px solid var(--px-border);
+    box-shadow: 4px 4px 0 var(--px-border);
+}
+
+.px-card-hover {
+    transition: transform 80ms, box-shadow 80ms;
+    cursor: pointer;
+}
+
+.px-card-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--px-border);
+}
+
+/* Buttons */
+.px-btn {
+    font-family: var(--px-font);
+    font-size: 10px;
+    border: 3px solid var(--px-border);
+    box-shadow: 3px 3px 0 var(--px-border);
+    cursor: pointer;
+    transition: transform 80ms, box-shadow 80ms;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+    background: var(--px-yellow);
+    color: var(--px-text);
+    padding: 10px 18px;
+    text-decoration: none;
+}
+
+.px-btn:hover {
+    filter: brightness(0.97);
+    color: inherit;
+}
+
+.px-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--px-border);
+}
+
+.px-btn:disabled {
+    background: var(--px-gray) !important;
+    color: var(--px-muted) !important;
+    cursor: not-allowed;
+}
+
+.px-btn-pink {
+    background: var(--px-pink);
+    color: #FFFFFF;
+}
+
+.px-btn-blue {
+    background: var(--px-blue);
+    color: var(--px-text);
+}
+
+.px-btn-card {
+    background: var(--px-card);
+    color: var(--px-text);
+}
+
+/* Inputs */
+.px-input {
+    box-sizing: border-box;
+    border: 3px solid var(--px-border);
+    font-family: var(--px-font);
+    font-size: 10px;
+    padding: 10px 14px;
+    outline: none;
+    background: var(--px-card);
+    color: var(--px-text);
+    width: 100%;
+}
+
+.px-input:focus {
+    border-color: var(--px-pink);
+    box-shadow: 3px 3px 0 var(--px-pink);
+}
+
+.px-select {
+    border: 3px solid var(--px-border);
+    font-family: var(--px-font);
+    font-size: 9px;
+    padding: 10px 14px;
+    outline: none;
+    background: var(--px-card);
+    color: var(--px-text);
+    cursor: pointer;
+}
+
+.px-btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Auth pages (Login / Register) */
+.px-auth-page {
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+}
+
+.px-auth-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 32px 28px;
+}
+
+.px-auth-title {
+    font-size: 14px;
+    margin-bottom: 6px;
+    text-align: center;
+}
+
+.px-auth-subtitle {
+    text-align: center;
+    font-size: 9px;
+    color: var(--px-muted);
+    margin: 0 0 24px;
+}
+
+.px-auth-field {
+    margin-bottom: 18px;
+}
+
+.px-auth-label {
+    display: block;
+    font-family: var(--px-font);
+    font-size: 8px;
+    margin-bottom: 6px;
+    color: var(--px-text);
+}
+
+.px-auth-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-family: var(--px-font);
+    font-size: 8px;
+}
+
+.px-auth-links {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 11px;
+    text-align: center;
+}
+
+.px-auth-divider {
+    border: none;
+    border-top: 2px dashed var(--px-gray);
+    margin: 24px 0;
+}
+
+.px-auth-external {
+    text-align: center;
+}
+
+.px-auth-external-title {
+    font-size: 9px;
+    color: var(--px-muted);
+    margin-bottom: 12px;
+}
+
+.px-auth-page .text-danger {
+    color: var(--px-pink-dark);
+    font-size: 10px;
+    display: block;
+    margin-top: 4px;
+}
+
+.px-badge {
+    font-family: var(--px-font);
+    font-size: 7px;
+    padding: 3px 7px;
+    border: 2px solid var(--px-border);
+    display: inline-block;
+    background: var(--px-gray);
+    color: var(--px-text);
+}

@@ -1,0 +1,201 @@
+@page "/"
+@page "/movies"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using Microsoft.EntityFrameworkCore
+@using Movies.Models
+@using Movies.Components.Shared
+
+@inject IJSRuntime JS
+@inject IDbContextFactory<MoviesContext> DbFactory
+
+<PageTitle>Movies</PageTitle>
+
+<div class="px-watchlist-header">
+
+    <img src="images/movie.png"
+         alt=""
+         width="40"
+         height="40"
+         style="image-rendering:pixelated" />
+
+    <div>
+        <h1 class="px-heading">Movies</h1>
+
+        <span class="px-watchlist-count">
+            @TotalMovies total
+        </span>
+    </div>
+
+</div>
+
+<div class="px-movies-controls">
+
+    <div class="px-movies-search">
+        <Search MovieSelected="MovieSelected" />
+    </div>
+
+    <Sort Value="@sortOption"
+                ValueChanged="SortChanged" />
+
+</div>
+
+@if (movies.Count == 0)
+{
+    <div class="px-watchlist-empty">
+        No movies found.
+    </div>
+}
+else
+{
+    <div class="px-watchlist-grid">
+
+        @foreach (var movie in movies)
+        {
+            <MovieCard Movie="movie" />
+        }
+
+    </div>
+}
+
+<div class="px-movies-pagination">
+
+    <div class="px-movies-pagination-buttons">
+
+        <button class="px-btn px-btn-card"
+                disabled="@(CurrentPage == 1)"
+                @onclick="PreviousPage">
+            &larr; Previous
+        </button>
+
+        <button class="px-btn px-btn-card"
+                disabled="@(CurrentPage >= TotalPages)"
+                @onclick="NextPage">
+            Next &rarr;
+        </button>
+
+    </div>
+
+    <span class="px-movies-page-label">
+        Page @CurrentPage of @TotalPages
+    </span>
+
+</div>
+
+@code {
+
+    private List<Movie> movies = new();
+
+    private string titleFilter = string.Empty;
+
+    private string sortOption = "title-asc";
+
+    private const int ItemsPerPage = 24;
+
+    private int CurrentPage { get; set; } = 1;
+
+    private int TotalMovies { get; set; }
+
+    private int TotalPages =>
+        Math.Max(
+            1,
+            (int)Math.Ceiling(
+                TotalMovies / (double)ItemsPerPage));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMovies();
+    }
+
+    private async Task LoadMovies()
+    {
+        await using var context =
+            await DbFactory.CreateDbContextAsync();
+
+        IQueryable<Movie> query =
+            context.Movie.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(titleFilter))
+        {
+            query = query.Where(m =>
+                m.Title!.Contains(titleFilter));
+        }
+
+        query = sortOption switch
+        {
+            "title-desc" =>
+                query.OrderByDescending(m => m.Title),
+
+            "rating-desc" =>
+                query.OrderByDescending(m => m.Rating),
+
+            "rating-asc" =>
+                query.OrderBy(m => m.Rating),
+
+            "date-desc" =>
+                query.OrderByDescending(m => m.ReleaseDate),
+
+            "date-asc" =>
+                query.OrderBy(m => m.ReleaseDate),
+
+            _ =>
+                query.OrderBy(m => m.Title)
+        };
+
+        TotalMovies =
+            await query.CountAsync();
+
+        if (CurrentPage > TotalPages)
+        {
+            CurrentPage = TotalPages;
+        }
+
+        movies = await query
+            .Skip((CurrentPage - 1) * ItemsPerPage)
+            .Take(ItemsPerPage)
+            .ToListAsync();
+    }
+
+    private async Task MovieSelected(Movie movie)
+    {
+        titleFilter = movie.Title ?? string.Empty;
+
+        CurrentPage = 1;
+
+        await LoadMovies();
+    }
+
+    private async Task SortChanged(string value)
+    {
+        sortOption = value;
+
+        CurrentPage = 1;
+
+        await LoadMovies();
+    }
+
+    private async Task PreviousPage()
+    {
+        if (CurrentPage <= 1)
+            return;
+
+        CurrentPage--;
+
+        await LoadMovies();
+
+        await JS.InvokeVoidAsync("scrollToTop");
+    }
+
+    private async Task NextPage()
+    {
+        if (CurrentPage >= TotalPages)
+            return;
+
+        CurrentPage++;
+
+        await LoadMovies();
+
+        await JS.InvokeVoidAsync("scrollToTop");
+    }
+}

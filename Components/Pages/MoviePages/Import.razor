@@ -1,0 +1,177 @@
+@page "/movies/import"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admin")]
+@using TMDbLib.Client
+@using Movies.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<MoviesContext> DbFactory
+@inject IConfiguration Configuration
+
+<PageTitle>Import Movies</PageTitle>
+<h1>Import from TMDB</h1>
+
+<div class="mb-3 d-flex align-items-center gap-2">
+    <label class="form-label mb-0">Pages (20 movies each):</label>
+    <input type="number" @bind="Pages" min="1" max="20" class="form-control" style="width:80px" />
+    <button class="btn btn-primary" @onclick="Run" disabled="@Busy">
+        @(Busy ? "Importing…" : "Import")
+    </button>
+</div>
+
+@foreach (var msg in Log)
+{
+    <p class="text-muted">@msg</p>
+}
+
+
+@code {
+    private int Pages { get; set; } = 1;
+    private bool Busy { get; set; }
+    private List<string> Log { get; set; } = new();
+
+    private async Task Run()
+    {
+        Busy = true;
+        Log.Clear();
+
+        int imported = 0;
+        int skipped = 0;
+
+        using var client =
+            new TMDbClient(Configuration["TmdbApiKey"]!);
+
+        await using var context =
+            await DbFactory.CreateDbContextAsync();
+
+        for (int page = 1; page <= Pages; page++)
+        {
+            Log.Add($"page {page}...");
+            StateHasChanged();
+
+            var list =
+                await client.GetMoviePopularListAsync(page: page);
+
+            foreach (var item in list.Results)
+            {
+                //get popular movies
+                if (item.VoteCount < 1000)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // Skip movies already in db
+                if (await context.Movie.AnyAsync(m =>
+                    m.TmdbId == item.Id))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                Log.Add($"{item.Title}");
+                StateHasChanged();
+
+                var details =
+                    await client.GetMovieAsync(
+                        item.Id,
+                        TMDbLib.Objects.Movies.MovieMethods.Credits);
+
+                // Double-check using the detailed TMDB data
+                if (details.VoteCount < 1000)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var director =
+                    details.Credits?
+                        .Crew
+                        .FirstOrDefault(c => c.Job == "Director")
+                        ?.Name;
+
+                var genre = string.Join(", ",
+                        details.Genres.Select(g => g.Name));
+
+                context.Movie.Add(
+                    new Movie
+                    {
+                        TmdbId = details.Id,
+
+                        Title =
+                            Truncate(
+                                details.Title ?? "Unknown",
+                                60),
+
+                        ReleaseDate =
+                            details.ReleaseDate.HasValue
+                                ? DateOnly.FromDateTime(
+                                    details.ReleaseDate.Value)
+                                : DateOnly.MinValue,
+
+                        Genre = genre,
+
+                        Director =
+                            Clean(director, 30),
+
+                        Rating =
+                            (decimal)Math.Round(
+                                details.VoteAverage,
+                                1),
+
+                        VoteCount =
+                            details.VoteCount,
+
+                        PosterPath =
+                            details.PosterPath
+                    });
+
+                imported++;
+            }
+
+            // Save each page before moving to the next one
+            await context.SaveChangesAsync();
+
+            Log.Add(
+                $"Page {page} " );
+
+            StateHasChanged();
+        }
+
+        Log.Add(
+            $"Finished — imported: {imported}, " +
+            $"skipped: {skipped}");
+
+        Busy = false;
+    }
+
+    private static string Truncate(string s, int max)
+    {
+        return s.Length > max
+            ? s[..max]
+            : s;
+    }
+
+    private static string Clean(string? s, int max)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+            return "Unknown";
+
+        var result =
+            System.Text.RegularExpressions.Regex
+                .Replace(
+                    s,
+                    @"[^a-zA-Z\s\-()]",
+                    "")
+                .Trim();
+
+        if (result.Length == 0 ||
+            !char.IsUpper(result[0]))
+        {
+            return "Unknown";
+        }
+
+        return result.Length > max
+            ? result[..max].TrimEnd()
+            : result;
+    }
+}

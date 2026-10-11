@@ -1,0 +1,57 @@
+.px-watchlist-item {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+}
+
+.px-watchlist-poster {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-bottom: 3px solid var(--px-border);
+}
+
+.px-no-poster {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--px-gray);
+    font-family: var(--px-font);
+    font-size: 8px;
+    color: var(--px-muted);
+}
+
+.px-watchlist-body {
+    flex: 1;
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.px-watchlist-title {
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.px-watchlist-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--px-font);
+    font-size: 8px;
+    color: var(--px-muted);
+}
+
+/* Push the rating row to the bottom */
+.px-watchlist-body .px-watchlist-meta:last-of-type {
+    margin-top: auto;
+}
+
+/* Keep a consistent gap between rating and button */
+.px-watchlist-body .px-btn {
+    margin-top: 6px;
+}
